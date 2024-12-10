@@ -1,29 +1,56 @@
+"use client";
 import React, { useEffect, useState } from "react";
-import PurchaseToken from './purchase_token';
+import PurchaseToken from "./purchase_token";
+import Login from "../components/loginUser"; // Login component
+import RegisterUser from "../components/registerUser"; // RegisterUser component
 
-const HomePage = () => {
-  const [totalSupply, setTotalSupply] = useState("Loading...");
-  const [countdown, setCountdown] = useState({
+// Type for countdown state
+interface Countdown {
+  days: string;
+  hours: string;
+  minutes: string;
+  seconds: string;
+}
+
+const HomePage: React.FC = () => {
+  const [totalSupply, setTotalSupply] = useState<string>("Loading...");
+  const [countdown, setCountdown] = useState<Countdown>({
     days: "00",
     hours: "00",
     minutes: "00",
     seconds: "00",
   });
-  const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false); // State to control modal visibility
+  const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState<boolean>(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState<boolean>(false);
+  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState<boolean>(false);
+  const [userName, setUserName] = useState<string | null>(null);
+  const apiUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 
+  // Async function to fetch total supply
+  const fetchTokenSupply = async () => {
+    try {
+      const response = await fetch(`${apiUrl}/token-supply`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const data = await response.json();
+      if (data && data.totalSupply) {
+        setTotalSupply(data.totalSupply.toString());
+      } else {
+        console.error("Invalid response structure:", data);
+        setTotalSupply("Error: Invalid data format.");
+      }
+    } catch (error) {
+      console.error("Error fetching token supply:", error);
+      setTotalSupply("Error loading supply.");
+    }
+  };
+  
   useEffect(() => {
-    // Fetch total token supply from the server and update the display
-    fetch("/api/token-supply")
-      .then((response) => response.json())
-      .then((data) => {
-        setTotalSupply(data.totalSupply);
-      })
-      .catch((error) => {
-        console.error("Error fetching token supply:", error);
-        setTotalSupply("Error loading supply.");
-      });
+    // Fetch total token supply from the server
+    fetchTokenSupply();
 
-    // Countdown Timer Script
+    // Countdown Timer
     const launchDate = new Date("April 3, 2024 00:00:00").getTime();
     const countdownTimer = setInterval(() => {
       const now = new Date().getTime();
@@ -35,10 +62,10 @@ const HomePage = () => {
       const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
 
       setCountdown({
-        days,
-        hours,
-        minutes,
-        seconds,
+        days: String(days).padStart(2, "0"),
+        hours: String(hours).padStart(2, "0"),
+        minutes: String(minutes).padStart(2, "0"),
+        seconds: String(seconds).padStart(2, "0"),
       });
 
       if (timeLeft < 0) {
@@ -52,6 +79,13 @@ const HomePage = () => {
       }
     }, 1000);
 
+    // Load user details from localStorage
+    const storedUser = localStorage.getItem("user_details");
+    if (storedUser) {
+      const user = JSON.parse(storedUser);
+      setUserName(user.name || "User");
+    }
+
     return () => clearInterval(countdownTimer); // Clean up on unmount
   }, []);
 
@@ -60,12 +94,27 @@ const HomePage = () => {
       {/* Hero Section */}
       <header className="hero-container">
         <div className="hero-content">
-          <h1 className="hero-title">Get Ready for the Big Tanacoin Launch!</h1>
+          {userName ? (
+            <h1 className="hero-title">Welcome back, {userName}!</h1>
+          ) : (
+            <h1 className="hero-title">Welcome to the Tanacoin Launch!</h1>
+          )}
           <p className="hero-description">
             Exclusive Weekend Discount! Get{" "}
             <span className="highlight-text">-25%</span> off the token price, every weekend!
           </p>
-          <a href="#details" className="cta-button">Learn More</a>
+          <div className="auth-buttons">
+            {!userName && (
+              <>
+                <button onClick={() => setIsLoginModalOpen(true)} className="cta-button">
+                  Login
+                </button>
+                <button onClick={() => setIsRegisterModalOpen(true)} className="cta-button">
+                  Register
+                </button>
+              </>
+            )}
+          </div>
         </div>
       </header>
 
@@ -79,7 +128,7 @@ const HomePage = () => {
           <ul className="token-features">
             <li>Token Type: ERC-20</li>
             <li>Launch Date: 3rd April</li>
-            <li>Total Supply: <span>{totalSupply}</span> Tanacoins</li>
+            <li>Total Supply: <span>{totalSupply}</span> TNC</li>
             <li>Price (Pre-sale): $0.10 per token</li>
           </ul>
         </div>
@@ -92,7 +141,6 @@ const HomePage = () => {
           <p className="promo-terms">
             Offer valid only until Sunday midnight. Don’t miss out!
           </p>
-          {/* Update Buy Now button to trigger modal */}
           <button onClick={() => setIsPurchaseModalOpen(true)} className="cta-button">
             Buy Now
           </button>
@@ -122,32 +170,15 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Login Section */}
-      <section className="login-container">
-        <h2>Login to Your Account</h2>
-        <form id="login-form" action="/login" method="POST">
-          <div className="input-group">
-            <label htmlFor="email">Email:</label>
-            <input type="email" id="email" name="email" required />
-          </div>
-          <div className="input-group">
-            <label htmlFor="password">Password:</label>
-            <input type="password" id="password" name="password" required />
-          </div>
-          <button type="submit" className="submit-btn">Login</button>
-        </form>
-        <p className="login-link">
-          Don't have an account? <a href="/registerUser">Sign Up</a>
-        </p>
-      </section>
-
       {/* Footer Section */}
       <footer className="footer-container">
         <p>&copy; 2024 Tanacoin Launch. All rights reserved.</p>
       </footer>
 
-      {/* PurchaseToken Modal Component */}
+      {/* Modals */}
       <PurchaseToken isOpen={isPurchaseModalOpen} setIsOpen={setIsPurchaseModalOpen} />
+      <Login isOpen={isLoginModalOpen} setIsOpen={setIsLoginModalOpen} />
+      <RegisterUser isOpen={isRegisterModalOpen} setIsOpen={setIsRegisterModalOpen} />
     </div>
   );
 };

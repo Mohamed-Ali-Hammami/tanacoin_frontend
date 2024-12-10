@@ -1,0 +1,117 @@
+/* src/app/styles/ContactUs.module.css */
+
+.wrapper {
+    background-color: rgba(61, 61, 61, 0.986);
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 6px 12px #0057b371;
+    border: 2px solid #0056b3;
+    max-width: 600px;
+    margin: 0 auto;
+    position: relative;
+    font-family: 'Segoe UI', Tahoma, Geneva, sans-serif;
+
+}
+
+.closeButton {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #888;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.closeButton:hover {
+    color: #0056b3;
+}
+
+.customh1 {
+    font-size: 26px;
+    font-weight: 600;
+    color: #ffffff;
+    text-align: center;
+    margin-bottom: 20px;
+    border-bottom: 2px #0056b3;
+}
+
+.formInput input,
+.formInput textarea {
+    width: 100%;
+    padding: 12px 15px;
+    font-size: 16px;
+    border-radius: 20px;
+    border: 1px solid #ddd;
+    margin-bottom: 15px;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.formInput input:focus,
+.formInput textarea:focus {
+    border: 1px solid;
+    border-color: #0056b3;
+}
+
+.errorInput {
+    border-color: #e74c3c;
+}
+
+.error {
+    color: #e74c3c;
+    font-size: 14px;
+    margin-top: -10px;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.submitButton {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+    background-color: #888;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.submitButton:hover {
+    background-color: #0056b3;
+}
+
+.statusMessage {
+    font-size: 16px;
+    color: #4a90e2;
+    text-align: center;
+    margin-top: 15px;
+}
+
+.spinnerContainer {
+    display: flex;
+    justify-content: center;
+    margin-top: 15px;
+}
+
+.loadingSpinner {
+    width: 24px;
+    height: 24px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #4a90e2;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
